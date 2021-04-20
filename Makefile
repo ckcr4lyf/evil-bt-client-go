@@ -1,4 +1,4 @@
 .PHONY: linux
 
 make linux:
-	go build -i ./bin/main ./cmd/app/main.go
+	go build -o ./bin/main ./cmd/app/main.go

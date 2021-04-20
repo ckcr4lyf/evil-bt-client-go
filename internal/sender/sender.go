@@ -28,39 +28,35 @@ func SendData() {
 	}
 
 	//TODO: Seed with hash, number of pieces
-
 	// Send the handshake
 	handshakeMessage := message.MakeHandshakeMessage(args[2])
 	conn.Write(handshakeMessage)
-
-	recvBuffer := make([]byte, 1024)
-
+	recvBuffer := make([]byte, 68)
 	_, err = conn.Read(recvBuffer)
 
 	if err != nil {
 		log.Print("Failed to read from TCP socket")
 	}
 
-	log.Print(string(recvBuffer))
-	log.Print(len(recvBuffer))
-
-	// Send an interested request
-	conn.Write(message.MakeInterestedMessage())
-
+	// log.Printf("% x", recvBuffer[4:binary.BigEndian.Uint32(recvBuffer[0:4])])
+	log.Printf("The handshake response is % x", recvBuffer)
+	conn.Write(message.MakeInterestedMessage()) // Send an interested request
 	recvBuffer = make([]byte, 1024)
-
 	_, err = conn.Read(recvBuffer)
 
 	if err != nil {
 		log.Print("Failed to read from TCP socket")
 	}
 
-	log.Print(string(recvBuffer))
-	log.Print(len(recvBuffer))
+	// log.Printf("% x", recvBuffer)
+	log.Printf("% x", recvBuffer[0:4])
+	ps := binary.BigEndian.Uint32(recvBuffer[0:4])
+	log.Print("The payload size is ", ps)
+	log.Printf("The payload is % x", recvBuffer[4:4+ps])
+	log.Print(recvBuffer)
+	// os.Exit(0)
 
-	// Send a piece request
-	conn.Write(message.MakeRequest(0, 0))
-
+	conn.Write(message.MakeRequest(0, 0)) // Send a piece request
 	recvBuffer = make([]byte, 4)
 	_, err = conn.Read(recvBuffer)
 
@@ -70,11 +66,8 @@ func SendData() {
 	}
 
 	log.Printf("% x", recvBuffer)
-	log.Print(len(recvBuffer))
-
 	payloadSize := binary.BigEndian.Uint32(recvBuffer)
 	recvBuffer = make([]byte, payloadSize+1)
-
 	_, err = conn.Read(recvBuffer)
 
 	if err != nil {
@@ -83,7 +76,6 @@ func SendData() {
 	}
 
 	log.Printf("% x", recvBuffer)
-	log.Print(len(recvBuffer))
 
 	// log.Printf("% x", message.MakeHandshakeMessage("28dc4be125a69329b7dd1d90880cd2e3c514b384"))
 }
